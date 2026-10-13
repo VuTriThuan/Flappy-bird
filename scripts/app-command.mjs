@@ -1,0 +1,5 @@
+const [portText,name]=process.argv.slice(2);if(!['minimize','restore','start','pause','record','stopRecord','doctor'].includes(name))throw Error('Lệnh kiểm thử không hợp lệ');
+const port=Number(portText);const pages=await(await fetch(`http://127.0.0.1:${port}/json`)).json();const page=pages.find(x=>x.type==='page');if(!page)throw Error('Không thấy app');
+const ws=new WebSocket(page.webSocketDebuggerUrl);await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject});
+const result=await new Promise((resolve,reject)=>{ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id===1)m.error?reject(Error(JSON.stringify(m.error))):resolve(m.result)};ws.send(JSON.stringify({id:1,method:'Runtime.evaluate',params:{expression:`window.flappy.command(${JSON.stringify(name)})`,awaitPromise:true,returnByValue:true}}))});
+if(result.exceptionDetails)throw Error(result.exceptionDetails.text);console.log(JSON.stringify({command:name,state:result.result.value?.game,doctorResult:result.result.value?.doctorResult,schedules:result.result.value?.schedules?.map(s=>({status:s.status,id:s.id}))}));ws.close();

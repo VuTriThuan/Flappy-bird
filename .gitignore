@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-electron/
+release/
+vendor-bin/
+*.log
+.DS_Store

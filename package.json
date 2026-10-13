@@ -1,0 +1,52 @@
+{
+  "name": "flappy-auto-recorder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Flappy Bird tự chơi và quay màn hình A",
+  "main": "dist-electron/main.cjs",
+  "scripts": {
+    "postinstall": "node node_modules/electron/install.js",
+    "dev": "node scripts/build-electron.mjs && concurrently -k \"vite --host 127.0.0.1 --port 5180 --strictPort\" \"wait-on http://127.0.0.1:5180 && electron . --dev\"",
+    "build": "vite build && node scripts/build-electron.mjs && node scripts/prepare-binaries.mjs",
+    "start": "electron .",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "bot:benchmark": "node --import tsx scripts/benchmark-bot.ts",
+    "doctor": "node scripts/doctor.mjs",
+    "smoke:video": "npm run build && node scripts/smoke-video.mjs",
+    "smoke:workers": "npm run build && node scripts/smoke-workers.mjs",
+    "pack:mac": "npm run build && electron-builder --mac dir --x64",
+    "pack:win": "npm run build && electron-builder --win dir --x64"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "0.1.80",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.5.2",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.1",
+    "concurrently": "9.2.1",
+    "electron": "44.0.0",
+    "electron-builder": "26.0.12",
+    "esbuild": "0.25.9",
+    "ffmpeg-static": "5.2.0",
+    "ffprobe-static": "3.1.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.2",
+    "vite": "7.1.7",
+    "wait-on": "8.0.4"
+  },
+  "build": {
+    "appId": "local.flappy.auto.recorder",
+    "productName": "Flappy Auto Recorder",
+    "directories": {"output": "release"},
+    "files": ["dist/index.html", "dist/assets/**/*", "dist-electron/**/*", "package.json"],
+    "asarUnpack": ["node_modules/@napi-rs/**/*"],
+    "extraResources": [
+      {"from": "vendor-bin", "to": "bin"}
+    ],
+    "mac": {"target": "dir", "category": "public.app-category.games"},
+    "win": {"target": "dir"}
+  }
+}

@@ -1,0 +1,11 @@
+import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { gunzipSync, gzipSync } from 'node:zlib';
+const source=process.argv[2],root=process.argv[3];if(!source||!root)throw Error('Cần thư mục nguồn và data dir đích');
+const dir=join(root,'recordings','recover-test');await mkdir(dir,{recursive:true});
+const original=JSON.parse(await readFile(join(source,'metadata.json'),'utf8'));
+await copyFile(join(source,original.chunks[0]),join(dir,'chunk-00000.ndjson.gz'));
+const second=gunzipSync(await readFile(join(source,original.chunks[1]))).toString('utf8').split('\n').slice(0,10).join('\n')+'\n';
+const partial=gzipSync(second);await writeFile(join(dir,'chunk-00001.ndjson.gz.part'),partial.subarray(0,-8));
+await writeFile(join(dir,'metadata.json'),JSON.stringify({...original,id:'recover-test',status:'recording',frameCount:0,durationSeconds:0,chunks:[]}));
+console.log(dir);
